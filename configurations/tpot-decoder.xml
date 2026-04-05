@@ -1,0 +1,20 @@
+<!-- ============================================================
+     T-Pot Honeypot — Custom Wazuh Decoder
+     File location on Wazuh manager:
+     /var/ossec/etc/decoders/tpot_decoder.xml
+     ============================================================ -->
+
+<!-- Stage 1: Identify T-Pot JSON logs by prematch string -->
+<decoder name="tpot-json">
+  <prematch>{"type":</prematch>
+</decoder>
+
+<!-- Stage 2: Extract src_ip field from JSON body -->
+<decoder name="tpot-json-fields">
+  <parent>tpot-json</parent>
+  <use_own_name>true</use_own_name>
+  <json_null_field>discard</json_null_field>
+  <dynamic_fields>yes</dynamic_fields>
+  <regex>"src_ip":"(\.+)"</regex>
+  <order>srcip</order>
+</decoder>

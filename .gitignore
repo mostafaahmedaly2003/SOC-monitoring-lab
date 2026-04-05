@@ -1,0 +1,38 @@
+# API keys and credentials — NEVER commit these
+*.env
+.env*
+secrets.txt
+credentials.json
+api_keys.txt
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Log files (too large for git, use screenshots instead)
+*.log
+logs/
+
+# Compiled or temp files
+*.pyc
+__pycache__/
+*.tmp
+
+# Confidential course documents
+*Confidential*
+*CONFIDENTIAL*
+*Internal_Use*
+
+# Large binary files
+*.pcap
+*.pcapng
+*.vmdk
+*.ova
+*.iso

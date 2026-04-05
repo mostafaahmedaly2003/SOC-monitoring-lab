@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOC Infrastructure — Group 1 OJT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600;700&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════
+   ROOT
+══════════════════════════════════════════════ */
+:root {
+  --bg:      #040810;
+  --bg2:     #070d1a;
+  --surface: #0a1220;
+  --s2:      #0d1628;
+  --s3:      #111e34;
+  --border:  #152035;
+  --b2:      #1e3350;
+  --b3:      #2a4a6e;
+  --green:   #00e676;
+  --green2:  #00b058;
+  --cyan:    #00c8ff;
+  --cyan2:   #0090c0;
+  --amber:   #ffaa00;
+  --amber2:  #cc8800;
+  --red:     #ff3d6b;
+  --purple:  #a855f7;
+  --purple2: #7c3aed;
+  --text:    #dde8f0;
+  --t2:      #7a9ab8;
+  --t3:      #3d5872;
+  --mono:    'JetBrains Mono', monospace;
+  --head:    'Orbitron', monospace;
+  --body:    'Exo 2', sans-serif;
+  --g-green: 0 0 20px rgba(0,230,118,.25);
+  --g-cyan:  0 0 20px rgba(0,200,255,.25);
+  --g-amber: 0 0 20px rgba(255,170,0,.25);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+
+body{
+  background: var(--bg);
+  background-image:
+    radial-gradient(ellipse 80% 60% at 10% 0%,   rgba(0,230,118,.04) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 80% at 90% 100%,  rgba(0,200,255,.04) 0%,transparent 60%),
+    linear-gradient(rgba(0,200,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,200,255,.025) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 13px;
+  line-height: 1.6;
+  display: flex;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* scanline overlay */
+body::after{
+  content:'';pointer-events:none;position:fixed;inset:0;z-index:9999;
+  background: repeating-linear-gradient(0deg,
+    transparent,transparent 2px,
+    rgba(0,0,0,.08) 2px, rgba(0,0,0,.08) 4px);
+}
+
+/* ══════════════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════════════ */
+.sidebar{
+  width:240px; min-height:100vh;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display:flex; flex-direction:column;
+  position:fixed; top:0;left:0;bottom:0;
+  z-index:100; overflow-y:auto;
+}
+.sb-logo{
+  padding:28px 22px 20px;
+  border-bottom:1px solid var(--border);
+  position:relative;
+}
+.sb-logo::after{
+  content:'';position:absolute;bottom:-1px;left:22px;right:22px;height:1px;
+  background:linear-gradient(90deg, var(--green), transparent);
+}
+.sb-eyebrow{
+  font-family:var(--head); font-size:8px; font-weight:700;
+  color:var(--green); letter-spacing:.2em; text-transform:uppercase; margin-bottom:8px;
+}
+.sb-title{
+  font-family:var(--head); font-size:13px; font-weight:900; line-height:1.2;
+  color:var(--text); margin-bottom:4px;
+}
+.sb-title span{color:var(--green);}
+.sb-sub{font-family:var(--mono); font-size:9px; color:var(--t3); letter-spacing:.04em;}
+
+.sb-status{
+  margin:14px 18px;
+  padding:9px 14px;
+  background: rgba(0,230,118,.06);
+  border:1px solid rgba(0,230,118,.2);
+  clip-path: polygon(8px 0%,100% 0%,100% calc(100% - 8px),calc(100% - 8px) 100%,0% 100%,0% 8px);
+  display:flex; align-items:center; gap:8px;
+  font-family:var(--mono); font-size:10px; color:var(--green); font-weight:600;
+}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;position:relative;}
+.pulse::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid var(--green);animation:pulse 1.5s infinite;opacity:0;}
+@keyframes pulse{0%{transform:scale(1);opacity:.8}100%{transform:scale(2.5);opacity:0}}
+
+.nav-sec{
+  padding:16px 22px 6px;
+  font-family:var(--head); font-size:8px; font-weight:700;
+  color:var(--t3); letter-spacing:.15em; text-transform:uppercase;
+}
+.nav-item{
+  display:flex; align-items:center; gap:12px;
+  padding:10px 22px;
+  color:var(--t2); font-size:12px; font-weight:500; font-family:var(--body);
+  cursor:pointer; transition:all .2s; border-left:2px solid transparent;
+  user-select:none; letter-spacing:.02em;
+}
+.nav-item:hover{color:var(--text); background:rgba(0,200,255,.04);}
+.nav-item.active{
+  color:var(--green); border-left-color:var(--green);
+  background:rgba(0,230,118,.06);
+}
+.nav-ico{
+  width:20px;height:20px;border-radius:5px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px; flex-shrink:0;
+  background:rgba(255,255,255,.04); border:1px solid var(--border);
+}
+.nav-item.active .nav-ico{background:rgba(0,230,118,.12);border-color:rgba(0,230,118,.3);}
+
+.sb-footer{
+  margin-top:auto; padding:16px 22px;
+  border-top:1px solid var(--border);
+  font-family:var(--mono); font-size:9px; color:var(--t3); line-height:1.8;
+}
+.sb-footer strong{color:var(--t2);}
+
+/* ══════════════════════════════════════════════
+   MAIN
+══════════════════════════════════════════════ */
+.main{margin-left:240px; flex:1; display:flex; flex-direction:column; min-height:100vh;}
+
+/* TOP BAR */
+.topbar{
+  background:rgba(4,8,16,.92);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  padding:14px 32px;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:50; gap:12px; flex-wrap:wrap;
+}
+.topbar::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--green),var(--cyan),transparent);
+  opacity:.4;
+}
+.tb-left{}
+.tb-title{
+  font-family:var(--head); font-size:13px; font-weight:700;
+  color:var(--text); letter-spacing:.04em;
+}
+.tb-title span{color:var(--green);}
+.tb-meta{font-family:var(--mono); font-size:10px; color:var(--t3); margin-top:2px; letter-spacing:.03em;}
+.tb-badges{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+
+.badge{
+  display:inline-flex; align-items:center; gap:5px;
+  padding:3px 10px; border-radius:3px;
+  font-family:var(--mono); font-size:10px; font-weight:700; border:1px solid;
+  clip-path:polygon(6px 0%,100% 0%,100% calc(100% - 6px),calc(100% - 6px) 100%,0% 100%,0% 6px);
+}
+.b-g{color:var(--green);border-color:rgba(0,230,118,.3);background:rgba(0,230,118,.08);}
+.b-c{color:var(--cyan);border-color:rgba(0,200,255,.3);background:rgba(0,200,255,.08);}
+.b-a{color:var(--amber);border-color:rgba(255,170,0,.3);background:rgba(255,170,0,.08);}
+.b-p{color:var(--purple);border-color:rgba(168,85,247,.3);background:rgba(168,85,247,.08);}
+.b-r{color:var(--red);border-color:rgba(255,61,107,.3);background:rgba(255,61,107,.08);}
+
+/* ── PAGE ── */
+.page{padding:28px 32px; display:none; animation:pg-in .35s ease;}
+.page.active{display:block;}
+@keyframes pg-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ── SECTION HEADER ── */
+.s-title{
+  font-family:var(--head); font-size:14px; font-weight:900;
+  color:var(--text); letter-spacing:.08em; text-transform:uppercase;
+  display:flex; align-items:center; gap:12px; margin-bottom:6px;
+}
+.s-title::before{
+  content:'';width:3px;height:18px;
+  background:linear-gradient(to bottom,var(--green),var(--cyan));
+  border-radius:2px; flex-shrink:0;
+}
+.s-sub{font-size:12px; color:var(--t2); margin-bottom:22px; padding-left:15px; font-family:var(--mono);}
+
+/* ── GRID ── */
+.g{display:grid;gap:16px;}
+.g4{grid-template-columns:repeat(4,1fr);}
+.g3{grid-template-columns:repeat(3,1fr);}
+.g2{grid-template-columns:repeat(2,1fr);}
+.ga{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));}
+@media(max-width:1100px){.g4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.g4,.g3,.g2{grid-template-columns:1fr}}
+
+/* ── KPI CARD ── */
+.kpi{
+  background:var(--surface);
+  border:1px solid var(--border);
+  padding:24px 22px;
+  position:relative; overflow:hidden;
+  transition:transform .25s, box-shadow .25s;
+  clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));
+}
+.kpi:hover{transform:translateY(-3px);}
+.kpi::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+}
+.kpi-g::before{background:linear-gradient(90deg,var(--green),var(--green2));box-shadow:0 0 8px rgba(0,230,118,.5);}
+.kpi-c::before{background:linear-gradient(90deg,var(--cyan),var(--cyan2));}
+.kpi-a::before{background:linear-gradient(90deg,var(--amber),var(--amber2));}
+.kpi-p::before{background:linear-gradient(90deg,var(--purple),var(--purple2));}
+/* corner accent */
+.kpi::after{
+  content:'';position:absolute;bottom:0;right:0;
+  width:14px;height:14px;
+  border-bottom:2px solid;border-right:2px solid;
+}
+.kpi-g::after{border-color:var(--green);}
+.kpi-c::after{border-color:var(--cyan);}
+.kpi-a::after{border-color:var(--amber);}
+.kpi-p::after{border-color:var(--purple);}
+
+.kpi-bg{
+  position:absolute;right:18px;top:50%;transform:translateY(-50%);
+  font-size:44px;opacity:.05;pointer-events:none;
+}
+.kpi-lbl{
+  font-family:var(--head); font-size:8px; font-weight:700;
+  color:var(--t3); letter-spacing:.15em; text-transform:uppercase; margin-bottom:8px;
+}
+.kpi-val{
+  font-family:var(--head); font-size:38px; font-weight:900; line-height:1;
+  letter-spacing:-.01em;
+}
+.kpi-g .kpi-val{color:var(--green); text-shadow:0 0 20px rgba(0,230,118,.4);}
+.kpi-c .kpi-val{color:var(--cyan); text-shadow:0 0 20px rgba(0,200,255,.4);}
+.kpi-a .kpi-val{color:var(--amber); text-shadow:0 0 20px rgba(255,170,0,.4);}
+.kpi-p .kpi-val{color:var(--purple); text-shadow:0 0 20px rgba(168,85,247,.4);}
+.kpi-sub{font-family:var(--mono); font-size:10px; color:var(--t3); margin-top:6px;}
+
+/* ── CARD ── */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:0;
+  padding:22px;
+  position:relative;
+}
+/* corner brackets */
+.card::before,.card::after{
+  content:'';position:absolute;
+  width:14px;height:14px;
+  transition:all .3s;
+}
+.card::before{top:0;left:0;border-top:2px solid var(--b2);border-left:2px solid var(--b2);}
+.card::after{bottom:0;right:0;border-bottom:2px solid var(--b2);border-right:2px solid var(--b2);}
+.card:hover::before,.card:hover::after{width:20px;height:20px;border-color:var(--green);opacity:.7;}
+
+.card-hdr{
+  display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;
+}
+.card-title{
+  font-family:var(--head); font-size:9px; font-weight:700;
+  color:var(--t2); text-transform:uppercase; letter-spacing:.12em;
+  display:flex; align-items:center; gap:10px;
+}
+.ct-ico{
+  width:26px;height:26px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px; flex-shrink:0;
+  clip-path:polygon(6px 0%,100% 0%,100% calc(100% - 6px),calc(100% - 6px) 100%,0% 100%,0% 6px);
+}
+.ci-g{background:rgba(0,230,118,.12);color:var(--green);}
+.ci-c{background:rgba(0,200,255,.12);color:var(--cyan);}
+.ci-a{background:rgba(255,170,0,.12);color:var(--amber);}
+.ci-p{background:rgba(168,85,247,.12);color:var(--purple);}
+.ci-r{background:rgba(255,61,107,.12);color:var(--red);}
+
+/* ── DIVIDER ── */
+.div{border:none; border-top:1px solid var(--border); margin:14px 0;}
+
+/* ── TAGS ── */
+.tag{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:2px 8px;font-size:10px;font-weight:700;
+  font-family:var(--mono); border-radius:2px; border:1px solid;
+}
+.t-g{color:var(--green);border-color:rgba(0,230,118,.3);background:rgba(0,230,118,.08);}
+.t-c{color:var(--cyan);border-color:rgba(0,200,255,.3);background:rgba(0,200,255,.08);}
+.t-a{color:var(--amber);border-color:rgba(255,170,0,.3);background:rgba(255,170,0,.08);}
+.t-p{color:var(--purple);border-color:rgba(168,85,247,.3);background:rgba(168,85,247,.08);}
+.t-r{color:var(--red);border-color:rgba(255,61,107,.3);background:rgba(255,61,107,.08);}
+.t-pk{color:#ec4899;border-color:rgba(236,72,153,.3);background:rgba(236,72,153,.08);}
+.t-y{color:var(--amber);border-color:rgba(255,170,0,.3);background:rgba(255,170,0,.08);}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.tbl th{
+  background:var(--s2); color:var(--t2); text-align:left;
+  padding:9px 14px; font-family:var(--head); font-size:8px; font-weight:700;
+  text-transform:uppercase; letter-spacing:.1em;
+  border-bottom:1px solid var(--border);
+}
+.tbl th:first-child{border-left:2px solid var(--green);}
+.tbl td{
+  padding:10px 14px; border-bottom:1px solid rgba(21,32,53,.8);
+  vertical-align:middle; font-family:var(--body);
+}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tbody tr:hover td{background:rgba(0,230,118,.03);}
+.tbl td:first-child{border-left:2px solid transparent;}
+.tbl tbody tr:hover td:first-child{border-left-color:rgba(0,230,118,.4);}
+.mono{font-family:var(--mono);}
+
+/* ── PROGRESS ── */
+.prog-wrap{margin-bottom:14px;}
+.prog-hdr{display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;}
+.prog-hdr span:first-child{font-weight:600;color:var(--text);}
+.prog-bar{height:6px;background:var(--s2);border-radius:0;overflow:hidden;position:relative;}
+.prog-fill{height:100%;border-radius:0;transition:width 1.4s cubic-bezier(.4,0,.2,1);}
+/* Segmented style — pure CSS */
+.prog-fill::after{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(90deg,transparent,transparent 8px,rgba(0,0,0,.3) 8px,rgba(0,0,0,.3) 9px);
+}
+.pf-g{background:linear-gradient(90deg,var(--green),var(--green2));}
+.pf-c{background:linear-gradient(90deg,var(--cyan),var(--cyan2));}
+.pf-a{background:linear-gradient(90deg,var(--amber),var(--amber2));}
+.pf-p{background:linear-gradient(90deg,var(--purple),var(--purple2));}
+.pf-r{background:linear-gradient(90deg,var(--red),#c01040);}
+
+/* ── METRIC ROW ── */
+.mrow{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+.mrow:last-child{border-bottom:none;}
+.mrow-l{display:flex;align-items:center;gap:10px;}
+.mrow-dot{width:6px;height:6px;border-radius:0;flex-shrink:0;transform:rotate(45deg);}
+.mrow-name{font-size:12px;color:var(--text);font-weight:500;}
+.mrow-r{display:flex;align-items:center;gap:10px;}
+.mrow-bw{width:80px;height:4px;background:var(--s2);overflow:hidden;}
+.mrow-b{height:100%;}
+.mrow-val{font-family:var(--mono);font-weight:700;font-size:12px;min-width:48px;text-align:right;}
+.assess{padding:2px 8px;font-family:var(--head);font-size:8px;font-weight:700;letter-spacing:.06em;border-radius:2px;}
+.a-ex{background:rgba(0,230,118,.12);color:var(--green);}
+.a-gd{background:rgba(0,200,255,.12);color:var(--cyan);}
+.a-ok{background:rgba(255,170,0,.12);color:var(--amber);}
+
+/* ── FLOW STEPS ── */
+.flow-wrap{display:flex;flex-direction:column;gap:0;}
+.fstep{display:flex;gap:14px;padding:10px 0;position:relative;}
+.fstep:not(:last-child)::after{
+  content:'';position:absolute;left:14px;top:38px;bottom:0;
+  width:1px;background:linear-gradient(to bottom,rgba(0,230,118,.4),transparent);
+}
+.fstep-n{
+  width:28px;height:28px;flex-shrink:0;
+  background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.3);
+  color:var(--green);font-family:var(--head);font-size:10px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;
+  clip-path:polygon(4px 0%,100% 0%,100% calc(100% - 4px),calc(100% - 4px) 100%,0% 100%,0% 4px);
+}
+.fstep-body{padding-top:5px;}
+.fstep-t{font-weight:700;color:var(--green);font-family:var(--head);font-size:10px;letter-spacing:.06em;margin-bottom:2px;}
+.fstep-d{font-size:12px;color:var(--t2);}
+
+/* ── OBJECTIVE ── */
+.obj{
+  display:flex;gap:12px;padding:10px 14px;
+  background:var(--s2); margin-bottom:6px;
+  border-left:2px solid var(--green);
+  transition:background .2s,border-color .2s;
+}
+.obj:hover{background:var(--s3);border-left-color:var(--cyan);}
+.obj-n{
+  font-family:var(--head);color:var(--green);font-weight:900;
+  font-size:10px;flex-shrink:0;width:20px;margin-top:1px;
+}
+.obj-t{font-size:12px;color:var(--t2);}
+
+/* ── CHALLENGE ── */
+.ch{
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;
+  padding:14px 16px;background:var(--s2);
+  border-left:2px solid var(--amber);margin-bottom:8px;
+  transition:background .2s;
+}
+.ch:hover{background:var(--s3);}
+@media(max-width:600px){.ch{grid-template-columns:1fr;}}
+.ch-lbl{font-family:var(--head);font-size:8px;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;}
+.ch-p{font-weight:700;color:var(--amber);font-size:12px;margin-bottom:4px;}
+.ch-d{font-size:11px;color:var(--t3);}
+.ch-s{font-size:12px;color:var(--green);}
+
+/* ── SQUAD ── */
+.squad-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;}
+.squad-card{
+  padding:20px;background:var(--s2);
+  border:1px solid var(--border);text-align:center;transition:all .25s;
+  position:relative; overflow:hidden;
+}
+.squad-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+}
+.sc-blue::before{background:var(--cyan);}
+.sc-red::before{background:var(--red);}
+.sc-grc::before{background:var(--amber);}
+.sc-cloud::before{background:var(--green);}
+.squad-card:hover{transform:translateY(-3px);border-color:var(--b3);}
+.sq-icon{font-size:28px;margin-bottom:10px;}
+.squad-card h3{font-family:var(--head);font-size:11px;font-weight:700;letter-spacing:.06em;margin-bottom:6px;}
+.squad-card p{font-size:10px;color:var(--t3);line-height:1.6;font-family:var(--mono);}
+
+/* ── ADAPTER CARD ── */
+.adapt{
+  padding:18px;background:var(--s2);
+  border:1px solid var(--border);
+  border-top:2px solid;transition:all .2s;
+}
+.adapt:hover{border-color:var(--b3);}
+.adapt-type{font-family:var(--head);font-size:8px;font-weight:700;color:var(--t3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px;}
+.adapt-ip{font-family:var(--mono);font-size:24px;font-weight:700;margin-bottom:4px;}
+.adapt-desc{font-size:11px;color:var(--t2);}
+
+/* ── FUTURE GRID ── */
+.future-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;}
+.fc{
+  padding:18px;background:var(--s2);
+  border:1px solid var(--border);
+  transition:all .25s; border-top:2px solid var(--b2);
+  position:relative;
+}
+.fc:hover{border-color:var(--b3);transform:translateY(-2px);}
+.fc:hover{border-top-color:var(--green);}
+.fc-ico{font-size:20px;margin-bottom:10px;}
+.fc-t{font-family:var(--head);font-size:10px;font-weight:700;color:var(--cyan);letter-spacing:.06em;margin-bottom:6px;}
+.fc-b{font-size:11px;color:var(--t2);line-height:1.6;}
+
+/* ── SECURITY PRINCIPLE ── */
+.sec-p{
+  padding:13px 16px;background:var(--s2);
+  border-left:2px solid;margin-bottom:8px;transition:background .2s;
+}
+.sec-p:hover{background:var(--s3);}
+.sec-pt{font-weight:700;font-family:var(--head);font-size:10px;letter-spacing:.06em;margin-bottom:4px;}
+.sec-pd{font-size:12px;color:var(--t2);}
+
+/* ── DATA FLOW (Shuffle workflow) ── */
+.flow-nodes{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px 0;}
+.fn{
+  padding:10px 14px;background:var(--s2);
+  border:1px solid var(--border);font-size:11px;text-align:center;
+  flex-shrink:0;
+}
+.fn-lbl{font-family:var(--head);font-size:8px;font-weight:700;letter-spacing:.08em;margin-bottom:3px;}
+.fn-val{color:var(--t2);font-size:11px;}
+.fn-arr{color:var(--b3);font-size:16px;flex-shrink:0;}
+.fn-out{display:flex;flex-direction:column;gap:5px;}
+.fno{padding:7px 12px;border:1px solid;font-size:11px;font-weight:700;font-family:var(--mono);}
+.fno-r{border-color:rgba(255,61,107,.3);background:rgba(255,61,107,.07);color:var(--red);}
+.fno-g{border-color:rgba(0,230,118,.3);background:rgba(0,230,118,.07);color:var(--green);}
+
+/* ── CONCLUSION ── */
+.conclusion{
+  background:linear-gradient(135deg,rgba(0,230,118,.04),rgba(0,200,255,.04));
+  border:1px solid var(--border);
+  padding:26px;font-size:13px;color:var(--t2);line-height:1.9;
+  margin-bottom:20px;
+  border-left:3px solid var(--green);
+}
+.conclusion strong{color:var(--text);}
+
+/* ── PASS/FAIL ── */
+.pass{background:rgba(0,230,118,.1);color:var(--green);padding:2px 8px;font-family:var(--head);font-size:9px;font-weight:700;letter-spacing:.06em;}
+.fail{background:rgba(255,61,107,.1);color:var(--red);padding:2px 8px;font-family:var(--head);font-size:9px;font-weight:700;letter-spacing:.06em;}
+
+/* ── LIMIT ITEM ── */
+.lim{
+  padding:11px 14px;background:var(--s2);
+  border-left:2px solid;margin-bottom:7px;font-size:12px;
+}
+.lim-t{font-weight:700;font-family:var(--head);font-size:9px;letter-spacing:.06em;margin-bottom:3px;}
+.lim-r{color:var(--red);}
+.lim-a{color:var(--amber);}
+.lim-y{color:var(--amber);}
+.lim-g{color:var(--t2);}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:0}
+::-webkit-scrollbar-thumb:hover{background:var(--b3)}
+
+/* ── BOOT ANIM ── */
+@keyframes boot{from{opacity:0;transform:scaleX(.96)}to{opacity:1;transform:none}}
+.main{animation:boot .6s ease;}
+
+/* topology card */
+.topo-card{background:var(--surface);border:1px solid var(--border);padding:24px;}
+.topo-svg-wrap{overflow-x:auto;}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-eyebrow">DF × Confianza23</div>
+    <div class="sb-title">SOC <span>INFRA</span><br>DASHBOARD</div>
+    <div class="sb-sub">GROUP 1 — OJT PROJECT REPORT</div>
+  </div>
+
+  <div class="sb-status">
+    <div class="pulse"></div>
+    CS365 PLATFORM ACTIVE
+  </div>
+
+  <div class="nav-sec">Navigation</div>
+  <div class="nav-item active" data-page="overview"><span class="nav-ico">⬡</span> Overview</div>
+  <div class="nav-item" data-page="topology"><span class="nav-ico">⬡</span> Network Topology</div>
+  <div class="nav-item" data-page="architecture"><span class="nav-ico">⬡</span> Architecture</div>
+  <div class="nav-item" data-page="tools"><span class="nav-ico">⬡</span> Tools &amp; Stack</div>
+  <div class="nav-item" data-page="results"><span class="nav-ico">⬡</span> Results &amp; Metrics</div>
+  <div class="nav-item" data-page="challenges"><span class="nav-ico">⬡</span> Challenges</div>
+  <div class="nav-item" data-page="future"><span class="nav-ico">⬡</span> Future Roadmap</div>
+  <div class="nav-sec">Report</div>
+  <div class="nav-item" data-page="conclusion"><span class="nav-ico">⬡</span> Conclusion</div>
+
+  <div class="sb-footer">
+    <strong>April 2026</strong> — CONFIDENTIAL<br>
+    siem.cybersecurity365.net<br>
+    soar.cybersecurity365.net
+  </div>
+</aside>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<div class="main">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="tb-left">
+      <div class="tb-title">Building an Integrated <span>Security Operations Center</span></div>
+      <div class="tb-meta">SIEM · SOAR · IDS/IPS · HONEYPOT — AI SECURITY PROGRAM · CS365</div>
+    </div>
+    <div class="tb-badges">
+      <span class="badge b-g">Wazuh SIEM</span>
+      <span class="badge b-p">Shuffle SOAR</span>
+      <span class="badge b-a">Snort IDS/IPS</span>
+      <span class="badge b-c">T-Pot</span>
+      <span class="badge b-r">CONFIDENTIAL</span>
+    </div>
+  </div>
+
+  <!-- ════════════ PAGE: OVERVIEW ════════════ -->
+  <div class="page active" id="page-overview">
+    <div class="s-title">Project Overview</div>
+    <div class="s-sub">Digital Fortress × Confianza23 SOC Diploma Program — Group 1 Infrastructure Report</div>
+
+    <div class="g g4" style="margin-bottom:20px;">
+      <div class="kpi kpi-c">
+        <div class="kpi-bg">🛡</div>
+        <div class="kpi-lbl">Core Components</div>
+        <div class="kpi-val" data-count="5">5</div>
+        <div class="kpi-sub">Wazuh · Snort · Shuffle · T-Pot · CS365</div>
+      </div>
+      <div class="kpi kpi-p">
+        <div class="kpi-bg">👥</div>
+        <div class="kpi-lbl">Trainees</div>
+        <div class="kpi-val" data-count="20">20</div>
+        <div class="kpi-sub">4 specialized squads</div>
+      </div>
+      <div class="kpi kpi-g">
+        <div class="kpi-lbl">Attack → Block</div>
+        <div class="kpi-val">&lt;15s</div>
+        <div class="kpi-sub">End-to-end response time</div>
+      </div>
+      <div class="kpi kpi-a">
+        <div class="kpi-bg">✅</div>
+        <div class="kpi-lbl">Test Scenarios</div>
+        <div class="kpi-val" data-count="6">6</div>
+        <div class="kpi-sub">All passed — 100% success rate</div>
+      </div>
+    </div>
+
+    <div class="g g2" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-title"><span class="ct-ico ci-c">📄</span> Abstract</div>
+        </div>
+        <p style="font-size:13px;color:var(--t2);line-height:1.85;margin-bottom:14px;">
+          A fully integrated <strong style="color:var(--green)">Security Operations Center (SOC)</strong> infrastructure
+          built as part of the <em>DF × C23 SOC Diploma Program</em>. The project demonstrates a complete
+          security monitoring and automated incident response pipeline using five core open-source tools
+          deployed in a VMware lab environment.
+        </p>
+        <p style="font-size:12px;color:var(--t2);line-height:1.85;">
+          The architecture integrates a <strong style="color:var(--text)">Kali Linux</strong> attacker/gateway,
+          a <strong style="color:var(--text)">Windows 10</strong> victim endpoint,
+          <strong style="color:var(--text)">Snort</strong> inline IPS/IDS,
+          <strong style="color:var(--text)">Wazuh</strong> SIEM,
+          <strong style="color:var(--text)">Shuffle</strong> SOAR, and
+          <strong style="color:var(--text)">T-Pot</strong> honeypot — all connected across a multi-adapter VMware topology.
+        </p>
+        <div class="div"></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <span class="tag t-c">Wazuh SIEM</span>
+          <span class="tag t-p">Shuffle SOAR</span>
+          <span class="tag t-a">Snort IDS/IPS</span>
+          <span class="tag t-y">T-Pot Honeypot</span>
+          <span class="tag t-g">VirusTotal</span>
+          <span class="tag t-g">SendGrid</span>
+          <span class="tag t-pk">MISP</span>
+          <span class="tag t-c">Docker</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-title"><span class="ct-ico ci-g">📊</span> NIST CSF 2.0 Coverage</div>
+        </div>
+        <div class="prog-wrap">
+          <div class="prog-hdr"><span>Govern</span><span style="color:var(--amber);font-family:var(--mono);font-size:11px;">Partial — 50%</span></div>
+          <div class="prog-bar"><div class="prog-fill pf-a" style="width:0" data-w="50"></div></div>
+        </div>
+        <div class="prog-wrap">
+          <div class="prog-hdr"><span>Identify</span><span style="color:var(--cyan);font-family:var(--mono);font-size:11px;">Good — 70%</span></div>
+          <div class="prog-bar"><div class="prog-fill pf-c" style="width:0" data-w="70"></div></div>
+        </div>
+        <div class="prog-wrap">
+          <div class="prog-hdr"><span>Protect</span><span style="color:var(--cyan);font-family:var(--mono);font-size:11px;">Strong — 80%</span></div>
+          <div class="prog-bar"><div class="prog-fill pf-c" style="width:0" data-w="80"></div></div>
+        </div>
+        <div class="prog-wrap">
+          <div class="prog-hdr"><span>Detect</span><span style="color:var(--green);font-family:var(--mono);font-size:11px;">Excellent — 95%</span></div>
+          <div class="prog-bar"><div class="prog-fill pf-g" style="width:0" data-w="95"></div></div>
+        </div>
+        <div class="prog-wrap">
+          <div class="prog-hdr"><span>Respond</span><span style="color:var(--green);font-family:var(--mono);font-size:11px;">Strong — 85%</span></div>
+          <div class="prog-bar"><div class="prog-fill pf-g" style="width:0" data-w="85"></div></div>
+        </div>
+        <div class="prog-wrap">
+          <div class="prog-hdr"><span>Recover</span><span style="color:var(--purple);font-family:var(--mono);font-size:11px;">Partial — 45%</span></div>
+          <div class="prog-bar"><div class="prog-fill pf-p" style="width:0" data-w="45"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-hdr">
+        <div class="card-title"><span class="ct-ico ci-p">👥</span> Team Squads — 20 AI Security Trainees</div>
+        <span class="badge b-p">C23_SDD_SSDLC Integration</span>
+      </div>
+      <div class="squad-grid">
+        <div class="squad-card sc-blue">
+          <div class="sq-icon">🛡</div>
+          <h3 style="color:var(--cyan)">BLUE TEAM</h3>
+          <p>DFIR + SIEM<br>skill013_incident_response<br>skill054_logging_monitoring</p>
+        </div>
+        <div class="squad-card sc-red">
+          <div class="sq-icon">⚔️</div>
+          <h3 style="color:var(--red)">RED TEAM</h3>
+          <p>Threat Modeling<br>STRIDE / PASTA<br>MITRE ATT&CK</p>
+        </div>
+        <div class="squad-card sc-grc">
+          <div class="sq-icon">📋</div>
+          <h3 style="color:var(--amber)">GRC TEAM</h3>
+          <p>Privacy + Compliance<br>ISO 27001 · IEC 62443<br>NIS 2 · ENS</p>
+        </div>
+        <div class="squad-card sc-cloud">
+          <div class="sq-icon">☁️</div>
+          <h3 style="color:var(--green)">CLOUD TEAM</h3>
+          <p>Infrastructure<br>CI/CD Pipelines<br>HAMMER Platform</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-title"><span class="ct-ico ci-c">🎯</span> Project Objectives</div>
+      </div>
+      <div class="obj"><span class="obj-n">01</span><span class="obj-t">Deploy multi-layered VMware network topology with clear segmentation between attacker, gateway, victim, and monitoring zones</span></div>
+      <div class="obj"><span class="obj-n">02</span><span class="obj-t">Implement Snort as dual-mode IDS/IPS — NFQUEUE inline prevention + passive detection on the same adapter</span></div>
+      <div class="obj"><span class="obj-n">03</span><span class="obj-t">Deploy Wazuh SIEM in Docker to centralize logs from Snort alerts, Windows agent, and T-Pot honeypot</span></div>
+      <div class="obj"><span class="obj-n">04</span><span class="obj-t">Configure Shuffle SOAR to automate incident response: IP blocking, email notifications, incident logging</span></div>
+      <div class="obj"><span class="obj-n">05</span><span class="obj-t">Deploy T-Pot honeypot as sandboxed environment with Wazuh agent reporting to central SIEM</span></div>
+      <div class="obj"><span class="obj-n">06</span><span class="obj-t">Integrate all components into the CS365 Security Platform for centralized dashboard access</span></div>
+      <div class="obj"><span class="obj-n">07</span><span class="obj-t">Support Blue Team development of skill013_incident_response and skill054_logging_monitoring for C23_SDD_SSDLC</span></div>
+      <div class="obj"><span class="obj-n">08</span><span class="obj-t">Validate detection-to-response pipeline end-to-end using simulated attacks</span></div>
+    </div>
+  </div>
+
+  <!-- ════════════ PAGE: TOPOLOGY ════════════ -->
+  <div class="page" id="page-topology">
+    <div class="s-title">Network Topology</div>
+    <div class="s-sub">VMware multi-adapter topology — attack, victim, and monitoring traffic isolation</div>
+
+    <div class="g g3" style="margin-bottom:20px;">
+      <div class="adapt" style="border-top-color:var(--cyan)">
+        <div class="adapt-type">eth0 — NAT Adapter</div>
+        <div class="adapt-ip" style="color:var(--cyan)">192.168.61.128</div>
+        <div class="adapt-desc">Internet access for packages, Docker images, VirusTotal API, SendGrid</div>
+        <div style="margin-top:10px;"><span class="tag t-c">Internet Gateway</span></div>
+      </div>
+      <div class="adapt" style="border-top-color:var(--green)">
+        <div class="adapt-type">eth1 — Bridged Adapter</div>
+        <div class="adapt-ip" style="color:var(--green)">10.94.117.57</div>
+        <div class="adapt-desc">Clean traffic channel to Windows victim after Snort inspection</div>
+        <div style="margin-top:10px;"><span class="tag t-g">Victim Channel</span></div>
+      </div>
+      <div class="adapt" style="border-top-color:var(--amber)">
+        <div class="adapt-type">eth2 — Custom VMnet</div>
+        <div class="adapt-ip" style="color:var(--amber)">10.94.117.59</div>
+        <div class="adapt-desc">Attack traffic + Snort IDS/IPS inline inspection + T-Pot honeypot segment</div>
+        <div style="margin-top:10px;"><span class="tag t-a">Attack / Monitor</span></div>
+      </div>
+    </div>
+
+    <div class="topo-card" style="margin-bottom:20px;">
+      <div class="card-hdr">
+        <div class="card-title"><span class="ct-ico ci-c">🌐</span> Visual Network Diagram</div>
+      </div>
+      <div class="topo-svg-wrap">
+        <svg viewBox="0 0 940 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;min-width:700px;max-height:360px;font-family:'Exo 2',sans-serif;">
+          <defs>
+            <marker id="a0" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#1e3350"/></marker>
+            <marker id="ac" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#00c8ff"/></marker>
+            <marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff3d6b"/></marker>
+            <marker id="ag" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#00e676"/></marker>
+            <marker id="ap" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#a855f7"/></marker>
+            <marker id="aa" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ffaa00"/></marker>
+            <filter id="fg"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <filter id="fc"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+
+          <!-- Grid -->
+          <g stroke="#152035" stroke-width="0.5" opacity="0.5">
+            <line x1="0" y1="90" x2="940" y2="90"/>
+            <line x1="0" y1="185" x2="940" y2="185"/>
+            <line x1="0" y1="280" x2="940" y2="280"/>
+          </g>
+
+          <!-- INTERNET -->
+          <rect x="16" y="135" width="90" height="60" fill="#07101e" stroke="#152035" stroke-width="1.5"/>
+          <text x="61" y="159" text-anchor="middle" fill="#3d5872" font-size="18">🌐</text>
+          <text x="61" y="178" text-anchor="middle" fill="#3d5872" font-size="10" font-weight="700" font-family="'Orbitron',monospace" letter-spacing="1">INTERNET</text>
+          <text x="61" y="190" text-anchor="middle" fill="#2a4a6e" font-size="9" font-family="'JetBrains Mono',monospace">NAT/eth0</text>
+
+          <!-- KALI -->
+          <rect x="148" y="108" width="118" height="88" fill="rgba(255,61,107,0.07)" stroke="#ff3d6b" stroke-width="1.5" filter="url(#fc)"/>
+          <line x1="148" y1="108" x2="162" y2="108" stroke="#ff3d6b" stroke-width="3"/>
+          <text x="207" y="135" text-anchor="middle" fill="#ff3d6b" font-size="22">🐉</text>
+          <text x="207" y="156" text-anchor="middle" fill="#ff3d6b" font-size="11" font-weight="700" font-family="'Orbitron',monospace" letter-spacing="1">KALI LINUX</text>
+          <text x="207" y="170" text-anchor="middle" fill="#7a9ab8" font-size="9">Attacker + Gateway</text>
+          <text x="207" y="183" text-anchor="middle" fill="#3d5872" font-size="9" font-family="'JetBrains Mono',monospace">3 NICs | Docker Host</text>
+
+          <line x1="106" y1="165" x2="146" y2="165" stroke="#152035" stroke-width="1.5" marker-end="url(#a0)" stroke-dasharray="4,3"/>
+          <text x="127" y="158" text-anchor="middle" fill="#2a4a6e" font-size="8" font-family="'JetBrains Mono',monospace">NAT</text>
+
+          <!-- SNORT -->
+          <rect x="316" y="64" width="108" height="72" fill="rgba(255,170,0,0.07)" stroke="#ffaa00" stroke-width="1.5"/>
+          <line x1="316" y1="64" x2="332" y2="64" stroke="#ffaa00" stroke-width="3"/>
+          <text x="370" y="90" text-anchor="middle" fill="#ffaa00" font-size="20">🔍</text>
+          <text x="370" y="109" text-anchor="middle" fill="#ffaa00" font-size="10" font-weight="700" font-family="'Orbitron',monospace" letter-spacing="1">SNORT 3</text>
+          <text x="370" y="122" text-anchor="middle" fill="#7a9ab8" font-size="9">IDS / IPS · eth2 · NFQUEUE</text>
+
+          <path d="M266,140 Q292,100 313,100" stroke="#ff3d6b" stroke-width="1.5" fill="none" marker-end="url(#ar)" stroke-dasharray="3,2"/>
+          <text x="280" y="110" fill="#ff3d6b" font-size="9" font-family="'JetBrains Mono',monospace">attack</text>
+
+          <!-- T-POT -->
+          <rect x="316" y="222" width="108" height="72" fill="rgba(255,170,0,0.07)" stroke="#ffaa00" stroke-width="1.5"/>
+          <line x1="316" y1="222" x2="332" y2="222" stroke="#ffaa00" stroke-width="3"/>
+          <text x="370" y="247" text-anchor="middle" fill="#ffaa00" font-size="20">🍯</text>
+          <text x="370" y="266" text-anchor="middle" fill="#ffaa00" font-size="10" font-weight="700" font-family="'Orbitron',monospace" letter-spacing="1">T-POT</text>
+          <text x="370" y="279" text-anchor="middle" fill="#7a9ab8" font-size="9">Honeypot · eth2 segment</text>
+
+          <path d="M266,168 Q290,210 314,250" stroke="#ffaa00" stroke-width="1.5" fill="none" marker-end="url(#aa)" stroke-dasharray="3,2"/>
+
+          <!-- WAZUH -->
+          <rect x="484" y="108" width="120" height="88" fill="rgba(0,200,255,0.07)" stroke="#00c8ff" stroke-width="1.5" filter="url(#fc)"/>
+          <line x1="484" y1="108" x2="500" y2="108" stroke="#00c8ff" stroke-width="3"/>
+          <text x="544" y="135" text-anchor="middle" fill="#00c8ff" font-size="22">📊</text>
+          <text x="544" y="156" text-anchor="middle" fill="#00c8ff" font-size="10" font-weight="700" font-family="'Orbitron',monospace" letter-spacing="1">WAZUH SIEM</text>
+          <text x="544" y="170" text-anchor="middle" fill="#7a9ab8" font-size="9">Manager + Indexer</text>
+          <text x="544" y="183" text-anchor="middle" fill="#3d5872" font-size="9" font-family="'JetBrains Mono',monospace">10.94.117.58</text>
+
+          <line x1="424" y1="100" x2="482" y2="135" stroke="#ffaa00" stroke-width="1.5" marker-end="url(#aa)"/>
+          <text x="450" y="110" fill="#ffaa00" font-size="8" font-family="'JetBrains Mono',monospace">alerts</text>
+          <line x1="424" y1="258" x2="482" y2="175" stroke="#ffaa00" stroke-width="1.5" marker-end="url(#aa)"/>
+          <text x="435" y="228" fill="#ffaa00" font-size="8" font-family="'JetBrains Mono',monospace">agent</text>
+
+          <!-- WINDOWS 10 -->
+          <rect x="484" y="244" width="120" height="72" fill="rgba(0,230,118,0.07)" stroke="#00e676" stroke-width="1.5"/>
+          <line x1="484" y1="244" x2="500" y2="244" stroke="#00e676" stroke-width="3"/>
+          <text x="544" y="268" text-anchor="middle" fill="#00e676" font-size="20">🖥</text>
+          <text x="544" y="287" text-anchor="middle" fill="#00e676" font-size="10" font-weight="700" font-family="'Orbitron',monospace" letter-spacing="1">WINDOWS 10</text>
+          <text x="544" y="300" text-anchor="middle" fill="#7a9ab8" font-size="9">Victim · 10.94.117.61 · Wazuh Agent</text>
+
+          <path d="M424,118 Q456,210 482,264" stroke="#00e676" stroke-width="1.5" fill="none" marker-end="url(#ag)" stroke-dasharray="5,3"/>
+          <text x="440" y="195" fill="#00e676" font-size="8" font-family="'JetBrains Mono',monospace">clean</text>
+          <line x1="544" y1="244" x2="544" y2="198" stroke="#00e676" stroke-width="1.5" marker-end="url(#ag)"/>
+          <text x="550" y="224" fill="#00e676" font-size="8" font-family="'JetBrains Mono',monospace">TCP 1514</text>
+
+          <!-- SHUFFLE -->
+          <rect x="666" y="108" width="120" height="88" fill="rgba(168,85,247,0.07)" stroke="#a855f7" stroke-width="1.5"/>
+          <line x1="666" y1="108" x2="682" y2="108" stroke="#a855f7" stroke-width="3"/>
+          <text x="726" y="135" text-anchor="middle" fill="#a855f7" font-size="22">⚙️</text>
+          <text x="726" y="156" text-anchor="middle" fill="#a855f7" font-size="10" font-weight="700" font-family="'Orbitron',monospace" letter-spacing="1">SHUFFLE SOAR</text>
+          <text x="726" y="170" text-anchor="middle" fill="#7a9ab8" font-size="9">Automation Engine</text>
+          <text x="726" y="183" text-anchor="middle" fill="#3d5872" font-size="9" font-family="'JetBrains Mono',monospace">port 3443</text>
+
+          <line x1="604" y1="152" x2="664" y2="152" stroke="#a855f7" stroke-width="1.5" marker-end="url(#ap)"/>
+          <text x="633" y="143" text-anchor="middle" fill="#a855f7" font-size="8" font-family="'JetBrains Mono',monospace">webhook L7+</text>
+
+          <!-- SERVICES -->
+          <rect x="840" y="60" width="84" height="48" fill="#07101e" stroke="#152035" stroke-width="1.5"/>
+          <text x="882" y="80" text-anchor="middle" fill="#3d5872" font-size="14">🦠</text>
+          <text x="882" y="96" text-anchor="middle" fill="#3d5872" font-size="9" font-weight="700" font-family="'Orbitron',monospace" letter-spacing="1">VIRUSTOTAL</text>
+
+          <rect x="840" y="122" width="84" height="48" fill="#07101e" stroke="#152035" stroke-width="1.5"/>
+          <text x="882" y="142" text-anchor="middle" fill="#3d5872" font-size="14">📧</text>
+          <text x="882" y="158" text-anchor="middle" fill="#3d5872" font-size="9" font-weight="700" font-family="'Orbitron',monospace" letter-spacing="1">SENDGRID</text>
+
+          <rect x="840" y="184" width="84" height="48" fill="#07101e" stroke="#152035" stroke-width="1.5"/>
+          <text x="882" y="204" text-anchor="middle" fill="#3d5872" font-size="14">🌐</text>
+          <text x="882" y="220" text-anchor="middle" fill="#3d5872" font-size="9" font-weight="700" font-family="'Orbitron',monospace" letter-spacing="1">CS365</text>
+
+          <line x1="786" y1="130" x2="838" y2="98" stroke="#1e3350" stroke-width="1.2" marker-end="url(#a0)" stroke-dasharray="3,2"/>
+          <line x1="786" y1="152" x2="838" y2="147" stroke="#1e3350" stroke-width="1.2" marker-end="url(#a0)" stroke-dasharray="3,2"/>
+          <line x1="786" y1="168" x2="838" y2="204" stroke="#1e3350" stroke-width="1.2" marker-end="url(#a0)" stroke-dasharray="3,2"/>
+
+          <!-- Legend -->
+          <rect x="16" y="314" width="908" height="1" fill="#152035"/>
+          <circle cx="36" cy="332" r="3" fill="#ff3d6b"/>
+          <text x="46" y="336" fill="#7a9ab8" font-size="10">Attack traffic</text>
+          <circle cx="136" cy="332" r="3" fill="#00e676"/>
+          <text x="146" y="336" fill="#7a9ab8" font-size="10">Clean / agent traffic</text>
+          <circle cx="256" cy="332" r="3" fill="#ffaa00"/>
+          <text x="266" y="336" fill="#7a9ab8" font-size="10">Snort alerts</text>
+          <circle cx="346" cy="332" r="3" fill="#a855f7"/>
+          <text x="356" y="336" fill="#7a9ab8" font-size="10">SOAR webhooks</text>
+          <circle cx="456" cy="332" r="3" fill="#1e3350"/>
+          <text x="466" y="336" fill="#7a9ab8" font-size="10">API calls (dashed)</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-title"><span class="ct-ico ci-c">📡</span> IP Address Reference</div>
+      </div>
+      <table class="tbl">
+        <thead>
+          <tr><th>Host</th><th>IP Address</th><th>Subnet</th><th>Gateway</th><th>Adapter</th><th>Role</th></tr>
+        </thead>
+        <tbody>
+          <tr><td style="font-weight:700">Kali Linux (eth2)</td><td class="mono" style="color:var(--amber)">10.94.117.59</td><td class="mono" style="color:var(--t2)">255.255.255.0</td><td>—</td><td><span class="tag t-a">Custom VMnet</span></td><td><span class="tag t-r">Attacker + Gateway</span></td></tr>
+          <tr><td style="font-weight:700">Windows 10</td><td class="mono" style="color:var(--green)">10.94.117.61</td><td class="mono" style="color:var(--t2)">255.255.255.0</td><td class="mono" style="color:var(--t3)">10.94.117.59</td><td><span class="tag t-g">Bridged</span></td><td><span class="tag t-g">Victim Endpoint</span></td></tr>
+          <tr><td style="font-weight:700">Wazuh Manager</td><td class="mono" style="color:var(--cyan)">10.94.117.58</td><td class="mono" style="color:var(--t2)">255.255.255.0</td><td>—</td><td><span class="tag t-c">Docker (Kali)</span></td><td><span class="tag t-c">SIEM</span></td></tr>
+          <tr><td style="font-weight:700">T-Pot Honeypot</td><td class="mono" style="color:var(--amber)">10.94.117.60</td><td class="mono" style="color:var(--t2)">255.255.255.0</td><td class="mono" style="color:var(--t3)">10.94.117.59</td><td><span class="tag t-a">Custom VMnet</span></td><td><span class="tag t-a">Honeypot VM</span></td></tr>
+          <tr><td style="font-weight:700">Kali NAT (eth0)</td><td class="mono" style="color:var(--cyan)">192.168.61.128</td><td class="mono" style="color:var(--t2)">255.255.255.0</td><td class="mono" style="color:var(--t3)">192.168.61.2</td><td><span class="tag t-c">NAT (eth0)</span></td><td><span class="tag t-c">Internet Access</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ════════════ PAGE: ARCHITECTURE ════════════ -->
+  <div class="page" id="page-architecture">
+    <div class="s-title">Architecture</div>
+    <div class="s-sub">Traffic flow, security design principles, and SOAR automation pipeline</div>
+
+    <div class="g g2" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-title"><span class="ct-ico ci-c">🔄</span> Traffic Flow — 7 Stages</div>
+        </div>
+        <div class="flow-wrap">
+          <div class="fstep"><div class="fstep-n">1</div><div class="fstep-body"><div class="fstep-t">Attack Initiation</div><div class="fstep-d">Kali attacker sends traffic via eth2 Custom VMnet toward victim and honeypot segments</div></div></div>
+          <div class="fstep"><div class="fstep-n">2</div><div class="fstep-body"><div class="fstep-t">Snort Inspection</div><div class="fstep-d">All eth2 traffic intercepted. IPS (NFQUEUE) drops malicious; IDS logs JSON alerts</div></div></div>
+          <div class="fstep"><div class="fstep-n">3</div><div class="fstep-body"><div class="fstep-t">Clean Forwarding</div><div class="fstep-d">Inspected traffic forwarded via eth1 Bridged to Windows — only clean packets reach endpoint</div></div></div>
+          <div class="fstep"><div class="fstep-n">4</div><div class="fstep-body"><div class="fstep-t">Endpoint Monitoring</div><div class="fstep-d">Wazuh agent collects Event Logs, process creation, FIM changes → Manager via TCP 1514</div></div></div>
+          <div class="fstep"><div class="fstep-n">5</div><div class="fstep-body"><div class="fstep-t">SIEM Correlation</div><div class="fstep-d">Wazuh correlates Snort alerts + Windows telemetry + T-Pot data, generates unified alerts</div></div></div>
+          <div class="fstep"><div class="fstep-n">6</div><div class="fstep-body"><div class="fstep-t">SOAR Automation</div><div class="fstep-d">Level 7+ alerts trigger Shuffle webhook → VT lookup → IP block + SendGrid email + log</div></div></div>
+          <div class="fstep"><div class="fstep-n">7</div><div class="fstep-body"><div class="fstep-t">Honeypot Trapping</div><div class="fstep-d">T-Pot captures attacker interactions on eth2; Wazuh agent streams to central SIEM</div></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-title"><span class="ct-ico ci-g">🔒</span> Security Design Principles</div>
+        </div>
+        <div class="sec-p" style="border-left-color:var(--cyan)"><div class="sec-pt" style="color:var(--cyan)">NETWORK SEGMENTATION</div><div class="sec-pd">Three adapters isolate attack traffic (Custom/eth2), victim channel (Bridged/eth1), and internet (NAT/eth0) — preventing lateral movement to SIEM management</div></div>
+        <div class="sec-p" style="border-left-color:var(--amber)"><div class="sec-pt" style="color:var(--amber)">DEFENSE-IN-DEPTH</div><div class="sec-pd">Dual IPS/IDS: IPS blocks known threats before victim; IDS captures all suspicious activity for forensics analysis</div></div>
+        <div class="sec-p" style="border-left-color:var(--green)"><div class="sec-pt" style="color:var(--green)">HOST-LEVEL VISIBILITY</div><div class="sec-pd">Wazuh agents detect local threats beyond network-level detection: process execution, file changes, privilege escalation, PowerShell</div></div>
+        <div class="sec-p" style="border-left-color:var(--purple)"><div class="sec-pt" style="color:var(--purple)">AUTOMATED RESPONSE</div><div class="sec-pd">Shuffle reduces MTTR from minutes to seconds. Level 12+ alerts trigger automatic IP blocking without analyst intervention</div></div>
+        <div class="sec-p" style="border-left-color:var(--amber)"><div class="sec-pt" style="color:var(--amber)">HONEYPOT DECEPTION</div><div class="sec-pd">T-Pot traffic is inherently suspicious — no legitimate users — providing high-confidence IOCs and attacker TTP data</div></div>
+        <div class="sec-p" style="border-left-color:var(--red)"><div class="sec-pt" style="color:var(--red)">CREDENTIAL MANAGEMENT</div><div class="sec-pd">API keys stored as Docker env vars. Shuffle uses encrypted credential storage. Agent keys distributed via DF × C23 secure onboarding</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-title"><span class="ct-ico ci-p">⚙️</span> Shuffle SOAR Workflow — SOC_Alert_Pipeline</div>
+      </div>
+      <div class="flow-nodes">
+        <div class="fn"><div class="fn-lbl" style="color:var(--cyan)">TRIGGER</div><div class="fn-val">Wazuh Webhook</div></div>
+        <div class="fn-arr">→</div>
+        <div class="fn"><div class="fn-lbl" style="color:var(--purple)">EXTRACT</div><div class="fn-val">$exec.data.srcip</div></div>
+        <div class="fn-arr">→</div>
+        <div class="fn"><div class="fn-lbl" style="color:var(--green)">LOOKUP</div><div class="fn-val">VirusTotal API</div></div>
+        <div class="fn-arr">→</div>
+        <div class="fn"><div class="fn-lbl" style="color:var(--amber)">BRANCH</div><div class="fn-val">malicious &gt; 0 ?</div></div>
+        <div class="fn-arr">→</div>
+        <div class="fn-out">
+          <div class="fno fno-r">📧 SendGrid Email Alert</div>
+          <div class="fno fno-r">🚫 Wazuh IP Block</div>
+          <div class="fno fno-g">📝 INFO Log (clean)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ PAGE: TOOLS ════════════ -->
+  <div class="page" id="page-tools">
+    <div class="s-title">Tools &amp; Technology Stack</div>
+    <div class="s-sub">Open-source tools forming the integrated SOC pipeline</div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-hdr">
+        <div class="card-title"><span class="ct-ico ci-a">🔧</span> Technology Stack</div>
+      </div>
+      <table class="tbl">
+        <thead><tr><th>Tool / Technology</th><th>Role in Project</th><th>Justification</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag t-r">🐉 Kali Linux (3 NICs)</span></td><td>Attacker, gateway, Docker host for Wazuh/Shuffle</td><td>Pre-loaded pentest tools; 3 adapters enable traffic segmentation</td></tr>
+          <tr><td><span class="tag t-g">🖥 Windows 10 (VMware)</span></td><td>Victim endpoint with Wazuh agent</td><td>Typical enterprise workstation; process, FIM, event log telemetry</td></tr>
+          <tr><td><span class="tag t-c">💻 VMware Workstation</span></td><td>Virtualization platform</td><td>Supports multiple NICs per VM for multi-segment topology</td></tr>
+          <tr><td><span class="tag t-a">🔍 Snort 3</span></td><td>Dual-mode IDS/IPS on eth2</td><td>Industry-standard; supports NFQUEUE inline and passive alert modes</td></tr>
+          <tr><td><span class="tag t-c">📊 Wazuh (Docker)</span></td><td>SIEM: Manager + Indexer + Dashboard</td><td>Full-featured open-source SIEM with HIDS, FIM, compliance</td></tr>
+          <tr><td><span class="tag t-p">⚙️ Shuffle SOAR (Docker)</span></td><td>Automated incident response</td><td>Open-source SOAR with visual editor, webhooks, REST integrations</td></tr>
+          <tr><td><span class="tag t-y">🍯 T-Pot Honeypot</span></td><td>Multi-honeypot sandbox VM</td><td>Attracts attackers; Wazuh agent reports to central SIEM</td></tr>
+          <tr><td><span class="tag t-c">🐳 Docker / Compose</span></td><td>Container runtime</td><td>Simplifies multi-container deployment</td></tr>
+          <tr><td><span class="tag t-g">🦠 VirusTotal API</span></td><td>Threat intelligence lookups</td><td>Free community-sourced reputation data via Shuffle HTTP actions</td></tr>
+          <tr><td><span class="tag t-g">📧 SendGrid</span></td><td>Email alert notifications</td><td>Reliable email API for automated SOC notifications</td></tr>
+          <tr><td><span class="tag t-pk">🔗 MISP</span></td><td>Threat intel IOC sharing</td><td>Extends CS365 stack; feeds IOCs into Wazuh rules</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-title"><span class="ct-ico ci-c">🔌</span> Component Interaction Matrix</div>
+      </div>
+      <table class="tbl">
+        <thead><tr><th>Component</th><th>Runs On</th><th>Communicates With</th><th>Protocol / Port</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag t-r">Kali Attacker</span></td><td>Kali VM</td><td>Snort (eth2), T-Pot (eth2)</td><td class="mono">Raw packets</td></tr>
+          <tr><td><span class="tag t-a">Snort IDS/IPS</span></td><td>Kali (eth2)</td><td>Wazuh (log forwarding)</td><td class="mono">NFQUEUE, Syslog/File</td></tr>
+          <tr><td><span class="tag t-g">Windows 10</span></td><td>Windows VM</td><td>Wazuh Manager (agent)</td><td class="mono">TCP 1514/1515</td></tr>
+          <tr><td><span class="tag t-c">Wazuh SIEM</span></td><td>Docker (Kali)</td><td>Snort, Win agent, Shuffle</td><td class="mono">REST API, Syslog, Webhook</td></tr>
+          <tr><td><span class="tag t-p">Shuffle SOAR</span></td><td>Docker / CS365</td><td>Wazuh, VirusTotal, SendGrid</td><td class="mono">Webhook, REST API</td></tr>
+          <tr><td><span class="tag t-y">T-Pot Honeypot</span></td><td>Standalone VM</td><td>Wazuh Manager (agent)</td><td class="mono">Wazuh agent protocol</td></tr>
+          <tr><td><span class="tag t-c">CS365 Dashboard</span></td><td>cybersecurity365.net</td><td>Wazuh Dashboard</td><td class="mono">HTTPS</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ════════════ PAGE: RESULTS ════════════ -->
+  <div class="page" id="page-results">
+    <div class="s-title">Results &amp; Performance</div>
+    <div class="s-sub">End-to-end validation, integration tests, and performance benchmarks</div>
+
+    <div class="g g2" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-title"><span class="ct-ico ci-g">⚡</span> Performance Metrics</div>
+        </div>
+        <div class="mrow"><div class="mrow-l"><div class="mrow-dot" style="background:var(--green)"></div><span class="mrow-name">Snort → Wazuh</span></div><div class="mrow-r"><div class="mrow-bw"><div class="mrow-b" style="width:95%;background:var(--green)"></div></div><span class="mrow-val" style="color:var(--green)">1–3 s</span><span class="assess a-ex">EXCELLENT</span></div></div>
+        <div class="mrow"><div class="mrow-l"><div class="mrow-dot" style="background:var(--cyan)"></div><span class="mrow-name">Wazuh → Shuffle</span></div><div class="mrow-r"><div class="mrow-bw"><div class="mrow-b" style="width:80%;background:var(--cyan)"></div></div><span class="mrow-val" style="color:var(--cyan)">2–5 s</span><span class="assess a-gd">GOOD</span></div></div>
+        <div class="mrow"><div class="mrow-l"><div class="mrow-dot" style="background:var(--green)"></div><span class="mrow-name">End-to-End (Attack → Block)</span></div><div class="mrow-r"><div class="mrow-bw"><div class="mrow-b" style="width:90%;background:var(--green)"></div></div><span class="mrow-val" style="color:var(--green)">5–15 s</span><span class="assess a-ex">EXCELLENT</span></div></div>
+        <div class="mrow"><div class="mrow-l"><div class="mrow-dot" style="background:var(--cyan)"></div><span class="mrow-name">Dashboard Query</span></div><div class="mrow-r"><div class="mrow-bw"><div class="mrow-b" style="width:85%;background:var(--cyan)"></div></div><span class="mrow-val" style="color:var(--cyan)">1–2 s</span><span class="assess a-gd">GOOD</span></div></div>
+        <div class="mrow"><div class="mrow-l"><div class="mrow-dot" style="background:var(--amber)"></div><span class="mrow-name">VirusTotal API</span></div><div class="mrow-r"><div class="mrow-bw"><div class="mrow-b" style="width:70%;background:var(--amber)"></div></div><span class="mrow-val" style="color:var(--amber)">1–3 s</span><span class="assess a-ok">FREE TIER</span></div></div>
+        <div class="mrow"><div class="mrow-l"><div class="mrow-dot" style="background:var(--green)"></div><span class="mrow-name">T-Pot Capture Rate</span></div><div class="mrow-r"><div class="mrow-bw"><div class="mrow-b" style="width:100%;background:var(--green)"></div></div><span class="mrow-val" style="color:var(--green)">100%</span><span class="assess a-ex">EXCELLENT</span></div></div>
+        <div class="mrow"><div class="mrow-l"><div class="mrow-dot" style="background:var(--cyan)"></div><span class="mrow-name">Email Delivery</span></div><div class="mrow-r"><div class="mrow-bw"><div class="mrow-b" style="width:75%;background:var(--cyan)"></div></div><span class="mrow-val" style="color:var(--cyan)">3–10 s</span><span class="assess a-gd">GOOD</span></div></div>
+        <div class="mrow"><div class="mrow-l"><div class="mrow-dot" style="background:var(--amber)"></div><span class="mrow-name">Kali RAM Usage</span></div><div class="mrow-r"><div class="mrow-bw"><div class="mrow-b" style="width:60%;background:var(--amber)"></div></div><span class="mrow-val" style="color:var(--amber)">4–6 GB</span><span class="assess a-ok">8 GB REC.</span></div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-title"><span class="ct-ico ci-r">⚠️</span> Known Limitations</div>
+        </div>
+        <div class="lim lim-r" style="border-left-color:var(--red)"><div class="lim-t lim-r">SINGLE-HOST DEPLOYMENT</div>Wazuh, Shuffle, and Snort on same VM creates resource contention in sustained attack scenarios</div>
+        <div class="lim lim-a" style="border-left-color:var(--amber)"><div class="lim-t lim-a">LAB SCALE ONLY</div>One victim endpoint vs production hundreds/thousands. Alerting volume not representative</div>
+        <div class="lim lim-a" style="border-left-color:var(--amber)"><div class="lim-t lim-a">FREE API RATE LIMITS</div>VirusTotal 4 req/min free tier — insufficient for production threat volumes</div>
+        <div class="lim" style="border-left-color:var(--amber)"><div class="lim-t lim-a">SELF-SIGNED TLS CERTIFICATES</div><span style="color:var(--t2)">Production deployment requires CA-signed certificates for all services</span></div>
+        <div class="lim" style="border-left-color:var(--amber)"><div class="lim-t lim-a">NO HIGH AVAILABILITY</div><span style="color:var(--t2)">Single point of failure throughout — clustering and redundancy needed for production</span></div>
+        <div class="lim" style="border-left-color:var(--b3)"><div class="lim-t lim-g">LIMITED ATTACK COVERAGE</div><span style="color:var(--t2)">Common attacks only; no APTs or zero-days tested. Manual rule management, no CI/CD feeds</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-title"><span class="ct-ico ci-g">✅</span> Integration Test Results — All Passed</div>
+        <span class="badge b-g">6/6 PASS</span>
+      </div>
+      <table class="tbl">
+        <thead><tr><th>#</th><th>Scenario</th><th>Attack Tool</th><th>Expected</th><th>Actual Result</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="mono" style="color:var(--t3)">01</td><td style="font-weight:700">Port Scan</td><td><span class="tag t-a">Nmap SYN</span></td><td>Alert + email</td><td style="color:var(--t2)">Detected in seconds; email delivered</td><td><span class="pass">PASS</span></td></tr>
+          <tr><td class="mono" style="color:var(--t3)">02</td><td style="font-weight:700">SSH Brute Force</td><td><span class="tag t-r">Hydra SSH</span></td><td>IPS block + auto IP block</td><td style="color:var(--t2)">Blocked; active response triggered</td><td><span class="pass">PASS</span></td></tr>
+          <tr><td class="mono" style="color:var(--t3)">03</td><td style="font-weight:700">Malicious IP Lookup</td><td><span class="tag t-c">curl (bad IP)</span></td><td>VT malicious score; email</td><td style="color:var(--t2)">Score &gt; 0; SendGrid email sent</td><td><span class="pass">PASS</span></td></tr>
+          <tr><td class="mono" style="color:var(--t3)">04</td><td style="font-weight:700">Clean IP Lookup</td><td><span class="tag t-g">curl (8.8.8.8)</span></td><td>VT clean; INFO log only</td><td style="color:var(--t2)">Clean result; logged correctly, no alert</td><td><span class="pass">PASS</span></td></tr>
+          <tr><td class="mono" style="color:var(--t3)">05</td><td style="font-weight:700">Honeypot Interaction</td><td><span class="tag t-y">SSH to T-Pot</span></td><td>Captured; Wazuh alert</td><td style="color:var(--t2)">Activity visible in Dashboard</td><td><span class="pass">PASS</span></td></tr>
+          <tr><td class="mono" style="color:var(--t3)">06</td><td style="font-weight:700">File Integrity Change</td><td><span class="tag t-g">Modify Win file</span></td><td>FIM alert with hash</td><td style="color:var(--t2)">Hash change details shown in SIEM</td><td><span class="pass">PASS</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ════════════ PAGE: CHALLENGES ════════════ -->
+  <div class="page" id="page-challenges">
+    <div class="s-title">Challenges &amp; Solutions</div>
+    <div class="s-sub">Technical obstacles encountered during implementation and how they were resolved</div>
+
+    <div class="card">
+      <div class="ch"><div><div class="ch-lbl">Challenge</div><div class="ch-p">Snort Adapter Assignment</div><div class="ch-d">Unclear whether to use Bridged or Custom VMnet for IPS inline placement</div></div><div><div class="ch-lbl">Solution Applied</div><div class="ch-s">Custom (eth2) is correct — sits between attacker and victim, enabling genuine inline IPS blocking before traffic reaches the endpoint</div></div></div>
+      <div class="ch"><div><div class="ch-lbl">Challenge</div><div class="ch-p">Dual IPS/IDS on One Interface</div><div class="ch-d">Complex NFQUEUE configuration for simultaneous inline prevention and passive detection</div></div><div><div class="ch-lbl">Solution Applied</div><div class="ch-s">NFQUEUE iptables rules for IPS + passive alert mode simultaneously on eth2. Both modes functional on same adapter</div></div></div>
+      <div class="ch"><div><div class="ch-lbl">Challenge</div><div class="ch-p">Wazuh Docker RAM Usage</div><div class="ch-d">High memory consumption from Wazuh + Shuffle on single VM host</div></div><div><div class="ch-lbl">Solution Applied</div><div class="ch-s">8 GB RAM allocation to Kali VM; tuned OpenSearch JVM heap size to reduce pressure</div></div></div>
+      <div class="ch"><div><div class="ch-lbl">Challenge</div><div class="ch-p">Webhook SSL/TLS Failures</div><div class="ch-d">Wazuh → Shuffle webhook calls failing due to self-signed certificate rejection</div></div><div><div class="ch-lbl">Solution Applied</div><div class="ch-s">Configured correct HTTPS port 3443 in Shuffle; disabled TLS verification for lab environment (not for production)</div></div></div>
+      <div class="ch"><div><div class="ch-lbl">Challenge</div><div class="ch-p">T-Pot vs Central Wazuh Conflict</div><div class="ch-d">T-Pot's built-in Elastic Stack conflicted with attempting to run central Wazuh on the same host</div></div><div><div class="ch-lbl">Solution Applied</div><div class="ch-s">Deployed separate Wazuh agent on T-Pot VM; kept T-Pot's native Elastic Stack locally, forwarded agent data to central Wazuh</div></div></div>
+      <div class="ch"><div><div class="ch-lbl">Challenge</div><div class="ch-p">Windows Agent Enrollment</div><div class="ch-d">Cross-segment connectivity issues preventing agent registration across Bridged/Custom adapters</div></div><div><div class="ch-lbl">Solution Applied</div><div class="ch-s">Verified IP routing between segments; added firewall exceptions for TCP 1514/1515 on both Kali and Windows</div></div></div>
+      <div class="ch"><div><div class="ch-lbl">Challenge</div><div class="ch-p">VirusTotal Rate Limiting</div><div class="ch-d">Free tier restricted to 4 requests/min — insufficient for high-alert scenarios in testing</div></div><div><div class="ch-lbl">Solution Applied</div><div class="ch-s">Added Shuffle delay node between alerts; implemented lookup result caching to reduce API call frequency</div></div></div>
+    </div>
+  </div>
+
+  <!-- ════════════ PAGE: FUTURE ════════════ -->
+  <div class="page" id="page-future">
+    <div class="s-title">Future Roadmap</div>
+    <div class="s-sub">Planned improvements to evolve the lab into a production-grade SOC platform</div>
+
+    <div class="future-grid" style="margin-bottom:20px;">
+      <div class="fc"><div class="fc-ico">🏗</div><div class="fc-t">Distributed Architecture</div><div class="fc-b">Separate Wazuh Manager, Indexer, and Dashboard onto dedicated VMs or cloud instances to eliminate single-host resource contention.</div></div>
+      <div class="fc"><div class="fc-ico">🌐</div><div class="fc-t">MISP Integration</div><div class="fc-b">Automated IOC feeds from MISP into Wazuh rules for proactive threat hunting beyond reactive signature detection.</div></div>
+      <div class="fc"><div class="fc-ico">🤖</div><div class="fc-t">AI / UEBA Analytics</div><div class="fc-b">Behavior analytics for anomaly detection beyond signatures. Aligned with HAMMER Q4 2026 roadmap by Confianza23.</div></div>
+      <div class="fc"><div class="fc-ico">📖</div><div class="fc-t">CACAO v2.0 Playbooks</div><div class="fc-b">Standardize Shuffle workflows per C23_SDD_SSDLC skill012 requirements for interoperable IR playbooks.</div></div>
+      <div class="fc"><div class="fc-ico">🍯</div><div class="fc-t">Expanded Honeypots</div><div class="fc-b">More T-Pot instances covering web application, database, and OT/ICS industrial attack surfaces.</div></div>
+      <div class="fc"><div class="fc-ico">🎫</div><div class="fc-t">Ticketing Integration</div><div class="fc-b">Connect Shuffle workflows to TheHive or Jira for structured SOC case management and analyst tracking.</div></div>
+      <div class="fc"><div class="fc-ico">📋</div><div class="fc-t">Compliance Dashboards</div><div class="fc-b">Map Wazuh dashboards to NIS 2, ISO 27001, IEC 62443, and ENS standards for automated compliance reporting.</div></div>
+      <div class="fc"><div class="fc-ico">🔴</div><div class="fc-t">Red Team Exercises</div><div class="fc-b">Periodic STRIDE/PASTA threat model assessments mapped to MITRE ATT&CK framework for continuous validation.</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-title"><span class="ct-ico ci-g">✅</span> Target Compliance &amp; Framework Coverage</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <span class="tag t-c">ISO 27001</span>
+        <span class="tag t-c">IEC 62443</span>
+        <span class="tag t-p">EU NIS 2</span>
+        <span class="tag t-a">ENS (Spain)</span>
+        <span class="tag t-g">NIST CSF 2.0</span>
+        <span class="tag t-g">NIST SP 800-61 Rev.3</span>
+        <span class="tag t-y">MITRE ATT&CK</span>
+        <span class="tag t-r">C23_SDD_SSDLC</span>
+        <span class="tag t-pk">CACAO v2.0</span>
+        <span class="tag t-c">HAMMER Platform</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ PAGE: CONCLUSION ════════════ -->
+  <div class="page" id="page-conclusion">
+    <div class="s-title">Conclusion</div>
+    <div class="s-sub">Summary of achievements, validation, and program impact</div>
+
+    <div class="conclusion">
+      <p style="margin-bottom:12px;">This project successfully <strong>designed, implemented, and validated</strong> a fully integrated SOC infrastructure using open-source tools within the <strong>Digital Fortress × Confianza23 SOC Diploma Program</strong>.</p>
+      <p style="margin-bottom:12px;">The <strong>multi-adapter VMware topology</strong> provides realistic traffic segmentation replicating production network zones. <strong>Snort's dual IDS/IPS mode</strong> delivers both inline prevention and passive detection. <strong>Wazuh's Docker-based SIEM</strong> centralizes logs from Snort alerts, Windows agents, and T-Pot honeypot. <strong>Shuffle SOAR</strong> automates incident response via webhook-driven workflows.</p>
+      <p>While lab-scale with known limitations, the project demonstrates that open-source tools can build an effective SOC pipeline covering the <strong>Detect, Respond, and Recover</strong> functions of the NIST Cybersecurity Framework.</p>
+    </div>
+
+    <div class="g g3" style="margin-bottom:20px;">
+      <div class="card" style="text-align:center;">
+        <div style="font-size:32px;margin-bottom:10px;">🎯</div>
+        <div style="font-family:var(--head);font-size:32px;font-weight:900;color:var(--green);text-shadow:0 0 20px rgba(0,230,118,.4);">100%</div>
+        <div style="font-size:12px;color:var(--t2);margin-top:6px;font-weight:600;">Test Scenarios Passed</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--t3);margin-top:4px;">All 6 integration scenarios validated</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="font-size:32px;margin-bottom:10px;">⚡</div>
+        <div style="font-family:var(--head);font-size:32px;font-weight:900;color:var(--cyan);text-shadow:0 0 20px rgba(0,200,255,.4);">&lt;15s</div>
+        <div style="font-size:12px;color:var(--t2);margin-top:6px;font-weight:600;">Attack to Block Time</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--t3);margin-top:4px;">Far faster than manual analyst response</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="font-size:32px;margin-bottom:10px;">🛡</div>
+        <div style="font-family:var(--head);font-size:32px;font-weight:900;color:var(--purple);text-shadow:0 0 20px rgba(168,85,247,.4);">5</div>
+        <div style="font-size:12px;color:var(--t2);margin-top:6px;font-weight:600;">Integrated Components</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--t3);margin-top:4px;">Wazuh · Snort · Shuffle · T-Pot · CS365</div>
+      </div>
+    </div>
+
+    <div style="padding:16px 20px;background:var(--s2);border:1px solid var(--border);border-left:2px solid var(--green);font-family:var(--mono);font-size:10px;color:var(--t3);line-height:2;">
+      <strong style="color:var(--t2)">Supervision:</strong> Mohamed Abdelaaty (Digital Fortress) · Rafael Ausejo Prieto (Confianza23) &nbsp;|&nbsp;
+      <strong style="color:var(--t2)">Platform:</strong> siem.cybersecurity365.net · soar.cybersecurity365.net &nbsp;|&nbsp;
+      <strong style="color:var(--t2)">Program:</strong> AI Security → C23_SDD_SSDLC Integration &nbsp;|&nbsp;
+      <strong style="color:var(--green)">April 2026</strong>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ── Navigation ─────────────────────────────────────────
+const navItems = document.querySelectorAll('.nav-item');
+const pages    = document.querySelectorAll('.page');
+
+navItems.forEach(item => {
+  item.addEventListener('click', () => {
+    const target = item.dataset.page;
+    navItems.forEach(n => n.classList.remove('active'));
+    pages.forEach(p => p.classList.remove('active'));
+    item.classList.add('active');
+    const page = document.getElementById('page-' + target);
+    if (page) {
+      page.classList.add('active');
+      if (target === 'overview') animateBars();
+    }
+  });
+});
+
+// ── Progress bars ──────────────────────────────────────
+function animateBars() {
+  document.querySelectorAll('.prog-fill[data-w]').forEach(bar => {
+    setTimeout(() => { bar.style.width = bar.dataset.w + '%'; }, 80);
+  });
+}
+window.addEventListener('load', () => { setTimeout(animateBars, 300); });
+
+// ── Counters ───────────────────────────────────────────
+function animCounter(el, target, dur) {
+  const start = performance.now();
+  (function tick(now) {
+    const p = Math.min((now - start) / dur, 1);
+    const e = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(e * target);
+    if (p < 1) requestAnimationFrame(tick);
+  })(performance.now());
+}
+window.addEventListener('load', () => {
+  document.querySelectorAll('[data-count]').forEach(el => {
+    animCounter(el, parseInt(el.dataset.count), 1400);
+  });
+});
+</script>
+</body>
+</html>

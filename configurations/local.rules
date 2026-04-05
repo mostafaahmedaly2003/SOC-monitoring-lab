@@ -1,0 +1,78 @@
+# =============================================================
+# Snort 3 Local Rules — SOC Lab
+# IDS alert rules (log + notify, do not block)
+# IPS drop  rules (block traffic inline via NFQUEUE)
+# =============================================================
+
+# ── IDS RULES ─────────────────────────────────────────────────
+
+# ICMP ping sweep — 5 pings in 2 seconds
+alert icmp any any -> $HOME_NET any (
+    msg:"IDS ICMP Ping Sweep Detected";
+    itype:8;
+    threshold:type threshold, track by_src, count 5, seconds 2;
+    sid:1000001; rev:1;
+)
+
+# Nmap SYN port scan — 20 SYN packets in 1 second
+alert tcp any any -> $HOME_NET any (
+    msg:"IDS Nmap SYN Port Scan";
+    flags:S;
+    threshold:type threshold, track by_src, count 20, seconds 1;
+    sid:1000002; rev:1;
+)
+
+# SSH brute force — 5 connection attempts in 60 seconds
+alert tcp any any -> $HOME_NET 22 (
+    msg:"IDS SSH Brute Force Attempt";
+    flags:S;
+    threshold:type threshold, track by_src, count 5, seconds 60;
+    sid:1000003; rev:1;
+)
+
+# HTTP on non-standard port — potential C2 beacon
+alert tcp any any -> $HOME_NET !80 (
+    msg:"IDS HTTP Non-Standard Port Possible C2";
+    content:"GET"; http_method;
+    sid:1000004; rev:1;
+)
+
+# RDP brute force — 5 attempts in 30 seconds
+alert tcp any any -> $HOME_NET 3389 (
+    msg:"IDS RDP Brute Force Attempt";
+    flags:S;
+    threshold:type threshold, track by_src, count 5, seconds 30;
+    sid:1000006; rev:1;
+)
+
+# FTP login attempt — any FTP authentication
+alert tcp any any -> $HOME_NET 21 (
+    msg:"IDS FTP Login Attempt";
+    content:"USER"; nocase;
+    sid:1000008; rev:1;
+)
+
+# DNS amplification — large DNS response
+alert udp any 53 -> $HOME_NET any (
+    msg:"IDS Potential DNS Amplification";
+    dsize:>512;
+    sid:1000009; rev:1;
+)
+
+# ── IPS RULES (active blocking) ───────────────────────────────
+
+# Block aggressive port scan — 30 SYN in 5 seconds
+drop tcp any any -> $HOME_NET any (
+    msg:"IPS BLOCK Aggressive Port Scan";
+    flags:S;
+    threshold:type threshold, track by_src, count 30, seconds 5;
+    sid:1000005; rev:1;
+)
+
+# Block ICMP flood — 50 pings per second
+drop icmp any any -> $HOME_NET any (
+    msg:"IPS BLOCK ICMP Flood";
+    itype:8;
+    threshold:type threshold, track by_src, count 50, seconds 1;
+    sid:1000007; rev:1;
+)
