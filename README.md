@@ -1,3 +1,20 @@
+# SOC Mini-Lab: Snort + Wazuh + T-Pot + Shuffle SOAR
+
+![Wazuh](https://img.shields.io/badge/Wazuh-4.14.4-005571?style=flat)
+![Snort](https://img.shields.io/badge/Snort-3.12.1-CC0000?style=flat)
+![T--Pot](https://img.shields.io/badge/T--Pot-24.04-orange?style=flat)
+![Shuffle](https://img.shields.io/badge/Shuffle_SOAR-Automated_Response-6A0DAD?style=flat)
+![NIST CSF](https://img.shields.io/badge/Framework-NIST_CSF_2.0-0057A8?style=flat)
+![License](https://img.shields.io/badge/License-GPL--2.0-blue?style=flat)
+![Detection](https://img.shields.io/badge/Detection_Time-5--15s-brightgreen?style=flat)
+![Scenarios](https://img.shields.io/badge/Test_Scenarios-6%2F6_Passed-brightgreen?style=flat)
+
+> **A fully integrated open-source SOC built in a virtualized lab environment.**  
+> Detects and automatically responds to real attacks in under 15 seconds.  
+> Stack: Kali Linux · Snort IDS/IPS · Wazuh SIEM · Windows 10 + Sysmon · T-Pot Honeypot · Shuffle SOAR
+
+---
+
 <p align="center">
   <img src="screenshots/12-soc-dashboard.png" alt="SOC Dashboard" width="900"/>
 </p>
