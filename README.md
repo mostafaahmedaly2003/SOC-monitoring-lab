@@ -99,7 +99,7 @@
 flowchart TB
     subgraph INTERNET["INTERNET"]
         NET[("WAN")]
-    end
+    end 
 
     subgraph KALI["KALI LINUX — Gateway + Attacker"]
         ETH0["eth0: NAT\n192.168.61.128"]
